@@ -18,11 +18,23 @@ def get_default_interface():
 def get_default_gateway():
     return netifaces.gateways()['default'][netifaces.AF_INET][0]
 
+
+parser = argparse.ArgumentParser(description='Scan the network hosts under the default gateway or a specified interface using nmap with sane defaults.')
+parser.add_argument('-i', '--interface', metavar='interface', default=get_default_interface(), type=str, nargs='?', help='Specify the interface to scan')
+parser.add_argument('-d', '--discovery', metavar='discovery scan arguments', default='-sP', type=str, nargs='?', help='Nmap parameters for the discovery scan')
+parser.add_argument('-s', '--service', metavar='service scan arguments', default='-A', type=str, nargs='?', help='Nmap parameters for the service scan')
+args = parser.parse_args()
+
+interface = args.interface
+discovery_args = args.discovery 
+service_args = args.service 
+
+
 def print_host_summary(address, open_ports):
     print('Host ' + address + ' has open ports: ' + str(open_ports))
 
 def discovery_scan(network):
-    result = nm.scan(hosts='10.37.38.57', arguments='-sP')
+    result = nm.scan(hosts='10.37.38.57', arguments=discovery_args)
     hosts = list(result['scan'].keys()) 
     print('Hosts discovered:')
     for host in hosts:
@@ -48,27 +60,19 @@ def print_results():
                     info_string += '\tversion: ' + port_info['version']
                 print (info_string)
 
-
 def service_scan(hosts):
     host_string = ' '.join(hosts)
-    nm.scan(hosts=host_string, arguments='-A')
+    nm.scan(hosts=host_string, arguments=service_args)
     print_results()
 
 
-parser = argparse.ArgumentParser(description='Scan the network for hosts under the default gateway or a specified interface.')
-parser.add_argument('-i', '--interface', metavar='interface', default=get_default_interface(), type=str, nargs='?', help='Specify the interface to scan')
-args = parser.parse_args()
-
-interface = args.interface
+print('Using interface ' + interface)
+addresses = netifaces.ifaddresses(interface)
 
 if interface not in netifaces.interfaces():
     print('Specified interface ' + interface + ' not found.')
     print('Available interfaces: ' + str(netifaces.interfaces()))
     exit(1)
-
-print('Using interface ' + interface)
-
-addresses = netifaces.ifaddresses(interface)
 
 if netifaces.AF_INET not in addresses:
     print('ERROR: Interface does not have an IPv4 address')
