@@ -22,7 +22,7 @@ def get_default_gateway():
 parser = argparse.ArgumentParser(description='Scan the network hosts under the default gateway or a specified interface using nmap with sane defaults.')
 parser.add_argument('-i', '--interface', metavar='interface', default=get_default_interface(), type=str, nargs='?', help='Specify the interface to scan')
 parser.add_argument('-d', '--discovery', metavar='discovery scan arguments', default='-sP -n', type=str, nargs='?', help='Nmap parameters for the discovery scan')
-parser.add_argument('-s', '--service', metavar='service scan arguments', default='-A', type=str, nargs='?', help='Nmap parameters for the service scan')
+parser.add_argument('-s', '--service', metavar='service scan arguments', default='-sV -T4 -F', type=str, nargs='?', help='Nmap parameters for the service scan')
 parser.add_argument('-a', '--address', metavar='address range', default='', type=str, nargs='?', help='Address range in the nmap format, ex. 192.168.0.0-255')
 args = parser.parse_args()
 
@@ -66,7 +66,7 @@ def print_results():
     print()
     for host in nm.all_hosts():
         print('----------------------------------------------------')
-        print('Host : %s (%s)' % (host, nm[host].hostname()))
+        print('Host : %s' % host)
         print('State : %s' % nm[host].state())
         for proto in nm[host].all_protocols():
             print('----------')
