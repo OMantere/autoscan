@@ -21,20 +21,41 @@ def get_default_gateway():
 
 parser = argparse.ArgumentParser(description='Scan the network hosts under the default gateway or a specified interface using nmap with sane defaults.')
 parser.add_argument('-i', '--interface', metavar='interface', default=get_default_interface(), type=str, nargs='?', help='Specify the interface to scan')
-parser.add_argument('-d', '--discovery', metavar='discovery scan arguments', default='-sP', type=str, nargs='?', help='Nmap parameters for the discovery scan')
+parser.add_argument('-d', '--discovery', metavar='discovery scan arguments', default='-sP -n', type=str, nargs='?', help='Nmap parameters for the discovery scan')
 parser.add_argument('-s', '--service', metavar='service scan arguments', default='-A', type=str, nargs='?', help='Nmap parameters for the service scan')
+parser.add_argument('-a', '--address', metavar='address range', default='', type=str, nargs='?', help='Address range in the nmap format, ex. 192.168.0.0-255')
 args = parser.parse_args()
 
 interface = args.interface
 discovery_args = args.discovery 
 service_args = args.service 
+address_range = args.address
 
 
 def print_host_summary(address, open_ports):
     print('Host ' + address + ' has open ports: ' + str(open_ports))
 
+def nmap_address_range(network):
+    hosts = list(network.hosts())
+    first = hosts[0].exploded.split('.')
+    last = hosts[-1].exploded.split('.')
+    address_range = ''
+    for i in range(4):
+        if last[i] == first[i]:
+            address_range += '%s.' % first[i]
+        else:
+            address_range += '%s-%s.' % (first[i], last[i])
+    return address_range[:-1]
+
+def get_address_range(network):
+    global address_range
+    if address_range != '':
+        return address_range
+    else:
+        return nmap_address_range(network)
+
 def discovery_scan(network):
-    result = nm.scan(hosts='10.37.38.57', arguments=discovery_args)
+    result = nm.scan(hosts=get_address_range(network), arguments=discovery_args)
     hosts = list(result['scan'].keys()) 
     print('Hosts discovered:')
     for host in hosts:
@@ -100,7 +121,7 @@ t0 = time.time()
 
 try:
     print()
-    print('Initiating discovery scan on ' + str(network.num_addresses) + ' addresses...')
+    print('Initiating discovery scan on range: ' + get_address_range(network) + '...')
     discovered_hosts = discovery_scan(network)
     print()
     print('Initiating service scan on ' + str(len(discovered_hosts)) + ' discovered hosts, this can take a while...')

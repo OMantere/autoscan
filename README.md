@@ -10,7 +10,7 @@ Run `python setup.py install` in the project directory.
 
 ~~~~
 usage: autoscan.py [-h] [-i [interface]] [-d [discovery scan arguments]]
-                   [-s [service scan arguments]]
+                   [-s [service scan arguments]] [-a [address range]]
 
 Scan the network hosts under the default gateway or a specified interface
 using nmap with sane defaults.
@@ -23,4 +23,6 @@ optional arguments:
                         Nmap parameters for the discovery scan
   -s [service scan arguments], --service [service scan arguments]
                         Nmap parameters for the service scan
+  -a [address range], --address [address range]
+                        Address range in the nmap format, ex. 192.168.0.0-255
 ~~~~
