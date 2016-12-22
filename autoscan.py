@@ -54,9 +54,11 @@ def get_address_range(network):
     else:
         return nmap_address_range(network)
 
-def discovery_scan(network):
+def discovery_scan(network, our_address):
     result = nm.scan(hosts=get_address_range(network), arguments=discovery_args)
     hosts = list(result['scan'].keys()) 
+    if our_address in hosts:
+        hosts.remove(our_address)
     print('Hosts discovered:')
     for host in hosts:
         print(host)
@@ -111,9 +113,10 @@ if 'netmask' not in ipv4_address:
 
 default_gateway = get_default_gateway()
 netmask = ipv4_address['netmask']
+our_address = ipv4_address['addr']
 network = ipaddress.IPv4Network((default_gateway, netmask), strict=False)
 print('Default gateway: ' + default_gateway + ', Network mask: ' + netmask)
-print('We are ' + ipv4_address['addr'])
+print('We are ' + our_address)
 
 
 # Scanning
@@ -122,7 +125,7 @@ t0 = time.time()
 try:
     print()
     print('Initiating discovery scan on range: ' + get_address_range(network) + '...')
-    discovered_hosts = discovery_scan(network)
+    discovered_hosts = discovery_scan(network, our_address)
     print()
     print('Initiating service scan on ' + str(len(discovered_hosts)) + ' discovered hosts, this can take a while...')
     service_scan(discovered_hosts)
