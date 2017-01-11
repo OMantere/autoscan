@@ -65,8 +65,8 @@ def discovery_scan(network, our_address):
     return hosts
 
 def print_results():
-    print()
     for host in nm.all_hosts():
+        print()
         print('----------------------------------------------------')
         print('Host : %s' % host)
         print('State : %s' % nm[host].state())
