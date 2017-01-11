@@ -4,9 +4,11 @@ Tries to automatically detect your default gateway/network interface and do a po
 
 ## Install
 
-Run `python setup.py install` in the project directory.
+Run `./setup.sh` in the project directory.
 
 ## Usage
+
+Just run `./autoscan` to run a scan on the default interface network with defaults.
 
 ~~~~
 usage: autoscan.py [-h] [-i [interface]] [-d [discovery scan arguments]]
